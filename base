@@ -2,3 +2,5 @@ import unittest
 import sqlite3
 import json
 import os
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
