@@ -4,6 +4,8 @@ import json
 import spotipy
 import webbrowser
 import spotipy.util as util
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 
 from json.decoder import JSONDecodeError
 
@@ -22,3 +24,12 @@ except:
 
 #create out spotifyObject
 spotifyObject = spotipy.Spotify(auth=token)
+
+scope = "user-library-read"
+
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+
+results = sp.current_user_saved_tracks()
+for idx, item in enumerate(results['items']):
+    track = item['track']
+    print(idx, track['artists'][0]['name'], " – ", track['name'])
