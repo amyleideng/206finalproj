@@ -19,9 +19,14 @@ def get_api(url, start, end):
 
 def get_range(cur):
 	# Find earliest date
-	cur.execute('SELECT MIN(year), MIN(month) FROM weather')
+	cur.execute('''
+		SELECT *
+		FROM weather
+		ORDER BY year, month
+		LIMIT 1
+	''')
 	earliest = cur.fetchone()
-	if None in earliest:
+	if earliest is None:
 		earliest = (datetime.now().year, datetime.now().month)
 
 	# Calculate 12 months prior
@@ -65,12 +70,14 @@ def show_data(cur):
 	years = []
 	temps = []
 
+	# Calculate average per year 
 	for year in available_year:
 		cur.execute('SELECT AVG(tavg) FROM weather WHERE year = ?', (year,))
 		tavg = cur.fetchone()[0]
 		years.append(year)
 		temps.append(tavg)
 
+	# Plot data as bar graph
 	plt.bar(np.array([y for y in years]), np.array([t for t in temps]), tick_label=years)
 	plt.xticks(rotation=45, ha='right', fontsize=8)
 	plt.title('Average Temperatures by Year')
