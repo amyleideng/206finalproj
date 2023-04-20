@@ -3,6 +3,7 @@ import json
 import os
 import sqlite3
 from brewery_stats import get_avg_brewery_type_by_state
+from brewery_stats import plot_avg_brewery_type_by_state
 
 def get_api(url):
     params = {"per_page": 100, "page": 1, "limit": 100, "fields": "id,name,brewery_type,state", "random":True}
@@ -120,5 +121,7 @@ def main():
             print(f"{brewery_type}: {percentage:.2%}")
         print()
 
+    #plot data
+    plot_avg_brewery_type_by_state(avg_brewery_type_by_state)
 if __name__ == "__main__":
     main()

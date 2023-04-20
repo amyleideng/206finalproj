@@ -1,4 +1,5 @@
 import sqlite3
+import matplotlib.pyplot as plt
 
 def get_avg_brewery_type_by_state(cur):
     """
@@ -31,3 +32,14 @@ def get_avg_brewery_type_by_state(cur):
             avg_brewery_type_by_state[state][brewery_type] /= total_breweries
 
     return avg_brewery_type_by_state
+#i <3 u
+
+def plot_avg_brewery_type_by_state(avg_brewery_type_by_state):
+    states = [int(state_dict['state_id']) for state_dict in avg_brewery_type_by_state]
+
+    avg_brewery_types = [float(state_dict['avg_brewery_type']) for state_dict in avg_brewery_type_by_state]
+    plt.bar(states, avg_brewery_types)
+    plt.xlabel('State ID')
+    plt.ylabel('Average Number of Breweries per Type')
+    plt.title('Average Number of Breweries per Type by State')
+    plt.show()
