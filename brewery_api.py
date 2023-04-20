@@ -1,4 +1,3 @@
-import unittest
 import requests
 import json
 import os
@@ -27,15 +26,22 @@ def setUpDatabase(db_name):
     return cur, conn
 
 def createBreweriesTable(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS breweries (id TEXT PRIMARY KEY, name TEXT UNIQUE, brewery_type_id INTEGER, state_id INTEGER, FOREIGN KEY(brewery_type_id) REFERENCES types(id), FOREIGN KEY(state_id) REFERENCES states(id))")
+    cur.execute("""CREATE TABLE IF NOT EXISTS breweries (
+                id TEXT PRIMARY KEY, 
+                name TEXT UNIQUE, 
+                brewery_type_id INTEGER NOT NULL, 
+                state_id INTEGER NOT NULL, 
+                FOREIGN KEY (brewery_type_id) REFERENCES types(id), 
+                FOREIGN KEY (state_id) REFERENCES states(id)
+                )""")
     conn.commit()
 
 def createTypeTable(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS types (id INTEGER PRIMARY KEY, type TEXT UNIQUE)")
+    cur.execute("CREATE TABLE IF NOT EXISTS types (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, type TEXT UNIQUE)")
     conn.commit()
 
 def createStateTable(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS states (id INTEGER PRIMARY KEY, state TEXT UNIQUE")
+    cur.execute("CREATE TABLE IF NOT EXISTS states (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, state TEXT UNIQUE)")
     conn.commit()
 
 def addTypes(breweries, cur, conn):
@@ -43,7 +49,7 @@ def addTypes(breweries, cur, conn):
     for brewery in breweries:
         types.add(brewery["brewery_type"])
 
-    for idx, t in enumerate(sorted(types)):
+    for idx, t in enumerate(types):
         cur.execute(
             """INSERT OR IGNORE INTO types (id, type)
             VALUES (?, ?)
@@ -57,7 +63,7 @@ def addStates(breweries, cur, conn):
     for brewery in breweries:
         states.add(brewery["state"])
 
-    for idx, s in enumerate(sorted(states)):
+    for idx, s in enumerate(states):
         cur.execute(
             """INSERT OR IGNORE INTO states (id, state)
             VALUES (?, ?)
@@ -83,7 +89,7 @@ def addBreweries(breweries, cur, conn):
             )
         rows += 1
     conn.commit()
-
+'''
 def get_info(cur, conn):
     cur.execute(
          """
@@ -94,15 +100,25 @@ def get_info(cur, conn):
         """
     )
     return cur.fetchall()
+'''
 
 def main():
     url = "https://api.openbrewerydb.org/v1/breweries"
     breweries = get_api(url)
     cur, conn = setUpDatabase("brewery_database.db")
     createBreweriesTable(cur, conn)
+    createTypeTable(cur, conn)
+    createStateTable(cur, conn)
+
     addBreweries(breweries, cur, conn)
+    addTypes(breweries, cur, conn)
+    addStates(breweries, cur, conn)
     avg_brewery_type_by_state = get_avg_brewery_type_by_state(cur)
-    print(avg_brewery_type_by_state)
+    for state in avg_brewery_type_by_state:
+        print(f"{state}:")
+        for brewery_type, percentage in avg_brewery_type_by_state[state].items():
+            print(f"{brewery_type}: {percentage:.2%}")
+        print()
 
 if __name__ == "__main__":
     main()

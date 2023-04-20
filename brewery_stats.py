@@ -8,20 +8,26 @@ def get_avg_brewery_type_by_state(cur):
     :return: a dictionary with the average brewery type for each state
     """
     cur.execute("""
-        SELECT state, AVG(CASE brewery_type 
-                            WHEN 'micro' THEN 1
-                            WHEN 'nano' THEN 2
-                            WHEN 'regional' THEN 3
-                            WHEN 'brewpub' THEN 4
-                            WHEN 'large' THEN 5
-                            WHEN 'planning' THEN 6
-                            WHEN 'contract' THEN 7
-                            ELSE 8
-                        END) AS avg_type
-        FROM breweries
-        GROUP BY state
-        """)
-    result = {}
-    for row in cur.fetchall():
-        result[row[0]] = int(row[1])
-    return result
+        SELECT States.state, Types.type, COUNT(*) as num_breweries
+        FROM Breweries
+        JOIN Types ON Breweries.brewery_type_id = Types.id
+        JOIN States ON Breweries.state_id = States.id
+        GROUP BY States.state, Types.type
+    """)
+
+    data = cur.fetchall()
+    avg_brewery_type_by_state = {}
+
+    for row in data:
+        state, brewery_type, num_breweries = row
+        if state not in avg_brewery_type_by_state:
+            avg_brewery_type_by_state[state] = {brewery_type: num_breweries}
+        else:
+            avg_brewery_type_by_state[state][brewery_type] = num_breweries
+
+    for state in avg_brewery_type_by_state:
+        total_breweries = sum(avg_brewery_type_by_state[state].values())
+        for brewery_type in avg_brewery_type_by_state[state]:
+            avg_brewery_type_by_state[state][brewery_type] /= total_breweries
+
+    return avg_brewery_type_by_state
