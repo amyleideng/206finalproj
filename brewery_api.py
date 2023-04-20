@@ -3,9 +3,10 @@ import requests
 import json
 import os
 import sqlite3
+from brewery_stats import get_avg_brewery_type_by_state
 
 def get_api(url):
-    params = {"per_page": 100, "page": 1, "limit": 100, "fields": "id,name,brewery_type,city,postal_code,country,state", "random":True}
+    params = {"per_page": 100, "page": 1, "limit": 100, "fields": "id,name,brewery_type,state", "random":True}
    
     response = requests.get(url, params=params)
     if response.status_code != 200:
@@ -25,8 +26,44 @@ def setUpDatabase(db_name):
     cur = conn.cursor()
     return cur, conn
 
-def createTable(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS breweries (id TEXT PRIMARY KEY, name TEXT, brewery_type TEXT, city TEXT, postal_code TEXT, country TEXT, state TEXT)")
+def createBreweriesTable(cur, conn):
+    cur.execute("CREATE TABLE IF NOT EXISTS breweries (id TEXT PRIMARY KEY, name TEXT UNIQUE, brewery_type_id INTEGER, state_id INTEGER, FOREIGN KEY(brewery_type_id) REFERENCES types(id), FOREIGN KEY(state_id) REFERENCES states(id))")
+    conn.commit()
+
+def createTypeTable(cur, conn):
+    cur.execute("CREATE TABLE IF NOT EXISTS types (id INTEGER PRIMARY KEY, type TEXT UNIQUE)")
+    conn.commit()
+
+def createStateTable(cur, conn):
+    cur.execute("CREATE TABLE IF NOT EXISTS states (id INTEGER PRIMARY KEY, state TEXT UNIQUE")
+    conn.commit()
+
+def addTypes(breweries, cur, conn):
+    types = set()
+    for brewery in breweries:
+        types.add(brewery["brewery_type"])
+
+    for idx, t in enumerate(sorted(types)):
+        cur.execute(
+            """INSERT OR IGNORE INTO types (id, type)
+            VALUES (?, ?)
+            """,
+            (idx+1, t)
+        )
+    conn.commit()
+
+def addStates(breweries, cur, conn):
+    states = set()
+    for brewery in breweries:
+        states.add(brewery["state"])
+
+    for idx, s in enumerate(sorted(states)):
+        cur.execute(
+            """INSERT OR IGNORE INTO states (id, state)
+            VALUES (?, ?)
+            """,
+            (idx+1, s)
+        )
     conn.commit()
 
 def addBreweries(breweries, cur, conn):
@@ -37,27 +74,35 @@ def addBreweries(breweries, cur, conn):
         id_num = brewery["id"]
         name = brewery["name"]
         brewery_type = brewery["brewery_type"]
-        city = brewery["city"]
-        postal_code = brewery["postal_code"]
-        country = brewery["country"]
         state = brewery["state"]
         cur.execute(
-            """INSERT OR IGNORE INTO breweries (id, name, brewery_type, 
-            city, postal_code, country, state)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """INSERT OR IGNORE INTO breweries (id, name, brewery_type_id, state_id)
+            VALUES (?, ?, (SELECT id FROM types WHERE type = ?), (SELECT id FROM states WHERE state = ?))
             """,
-            (id_num, name, brewery_type, city, postal_code, country, state)
+            (id_num, name, brewery_type, state)
             )
         rows += 1
     conn.commit()
-            
+
+def get_info(cur, conn):
+    cur.execute(
+         """
+        SELECT Types.type, States.state
+        FROM Breweries
+        JOIN Types ON Breweries.brewery_type_id = Types.id
+        JOIN States ON Breweries.state_id = States.id
+        """
+    )
+    return cur.fetchall()
 
 def main():
     url = "https://api.openbrewerydb.org/v1/breweries"
     breweries = get_api(url)
     cur, conn = setUpDatabase("brewery_database.db")
-    createTable(cur, conn)
+    createBreweriesTable(cur, conn)
     addBreweries(breweries, cur, conn)
+    avg_brewery_type_by_state = get_avg_brewery_type_by_state(cur)
+    print(avg_brewery_type_by_state)
 
 if __name__ == "__main__":
     main()
