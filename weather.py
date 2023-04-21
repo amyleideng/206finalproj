@@ -48,11 +48,11 @@ def init_database(cur):
 	''')
 
 def insert_month(cur, entry):
-	cur.execute(f'''
-		INSERT INTO weather (year, month, tavg)
-		VALUES ({entry['year']}, {entry['month']}, '{entry['tavg']}')
-	''')
-
+	cur.execute(
+		"INSERT INTO weather (year, month, tavg) VALUES (?, ?, ?)",
+		(entry['year'], entry['month'], entry['tavg'])
+	)
+	
 def parse_data(cur, data):
 	for entry in data['data']:
 		date = datetime.strptime(entry['date'], "%Y-%m-%d")
