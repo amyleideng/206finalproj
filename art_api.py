@@ -2,6 +2,9 @@ import requests
 import json
 import sqlite3
 import os
+from art_calc import calculate_dept_percent
+from art_calc import percents_bar_graph
+
 
 def get_api(url):
     params = {"limit": 100, "fields": "id,title,place_of_origin,department_title", "random":True}
@@ -20,7 +23,7 @@ def setup_database(db):
 
 def create_table(cur, conn):
     cur.execute("""CREATE TABLE IF NOT EXISTS artworks (
-                    id INTEGER PRIMARY KEY, 
+                    id INTEGER NOT NULL PRIMARY KEY, 
                     title TEXT UNIQUE, 
                     origin_id INTEGER, 
                     dept_id INTEGER, 
@@ -90,6 +93,8 @@ def main():
     add_dept(url, cur, conn)
     add_artwork(url, cur, conn)
     
+    dct = calculate_dept_percent(cur)
+    percents_bar_graph(dct)
 
     conn.close()
 
