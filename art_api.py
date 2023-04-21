@@ -80,6 +80,10 @@ def add_artwork(url, cur, conn):
 
     conn.commit()
 
+def write_json(dct):
+    with open("art_calculations.json", "w") as file:
+        json.dump(dct, file, indent = 4)
+
 def main():
     url = "https://api.artic.edu/api/v1/artworks"
     get_api(url)
@@ -95,6 +99,8 @@ def main():
     
     dct = calculate_dept_percent(cur)
     percents_bar_graph(dct)
+
+    write_json(dct)
 
     conn.close()
 
