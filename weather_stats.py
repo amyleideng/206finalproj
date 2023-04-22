@@ -1,20 +1,25 @@
+import json
 import sqlite3
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-def show_data(cur):
+def calculate_average(cur):
 	cur.execute('SELECT DISTINCT year FROM weather')
 	available_year = [row[0] for row in cur.fetchall()]
-	years = []
-	temps = []
+	data = {}
 
 	# Calculate average per year 
 	for year in available_year:
 		cur.execute('SELECT AVG(tavg) FROM weather WHERE year = ?', (year,))
 		tavg = cur.fetchone()[0]
-		years.append(year)
-		temps.append(tavg)
+		data[year] = tavg
+
+	return data
+
+def show_data(fp):
+	data = json.load(fp)
+	years = list(data.keys())
+	temps = list(data.values())
 
 	# Plot data as bar graph
 	plt.bar(np.array([y for y in years]), np.array([t for t in temps]), tick_label=years)
@@ -29,8 +34,12 @@ def main():
 	conn = sqlite3.connect("weather.db")
 	cur = conn.cursor()
 
-	# Parse and show data
-	show_data(cur)
+	# Calculate, Store, Show data
+	data = calculate_average(cur)
+	with open('calculations.json', 'w') as file:
+		json.dump(data, file)
+	with open('calculations.json', 'r') as file:
+		show_data(file)
 
 	# Cleanup
 	conn.commit()
