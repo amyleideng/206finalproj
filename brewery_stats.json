@@ -1,0 +1,52 @@
+{
+    "Arizona": {
+        "micro": 1.0
+    },
+    "California": {
+        "closed": 0.5,
+        "large": 0.5
+    },
+    "Colorado": {
+        "brewpub": 0.3333333333333333,
+        "large": 0.3333333333333333,
+        "micro": 0.3333333333333333
+    },
+    "Idaho": {
+        "large": 1.0
+    },
+    "Indiana": {
+        "micro": 1.0
+    },
+    "Laois": {
+        "micro": 1.0
+    },
+    "Massachusetts": {
+        "micro": 1.0
+    },
+    "Michigan": {
+        "micro": 1.0
+    },
+    "Minnesota": {
+        "micro": 1.0
+    },
+    "Nevada": {
+        "micro": 1.0
+    },
+    "New York": {
+        "brewpub": 1.0
+    },
+    "Oklahoma": {
+        "micro": 1.0
+    },
+    "Oregon": {
+        "brewpub": 0.5,
+        "large": 0.5
+    },
+    "Texas": {
+        "micro": 1.0
+    },
+    "Washington": {
+        "brewpub": 0.5,
+        "closed": 0.5
+    }
+}

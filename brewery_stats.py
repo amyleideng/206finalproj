@@ -35,11 +35,28 @@ def get_avg_brewery_type_by_state(cur):
 #i <3 u
 
 def plot_avg_brewery_type_by_state(avg_brewery_type_by_state):
-    states = [int(state_dict['state_id']) for state_dict in avg_brewery_type_by_state]
+    states = avg_brewery_type_by_state.keys()
+    avg_set = set()
+    for state in states:
+        avg_set.update(avg_brewery_type_by_state[state].keys())
+    type_names = list(avg_set)
 
-    avg_brewery_types = [float(state_dict['avg_brewery_type']) for state_dict in avg_brewery_type_by_state]
-    plt.bar(states, avg_brewery_types)
-    plt.xlabel('State ID')
-    plt.ylabel('Average Number of Breweries per Type')
-    plt.title('Average Number of Breweries per Type by State')
+    fig, ax = plt.subplots()
+    bar_width = 0.8 / len(states)
+
+    for i, state in enumerate(states):
+        freqs = [avg_brewery_type_by_state[state].get(type, 0) for type in type_names]
+        x = [j + i * bar_width for j in range(len(type_names))]
+        ax.bar(x, freqs, bar_width, label=state)
+
+    ax.set_xticks([j + bar_width for j in range(len(type_names))])
+    ax.set_xticklabels(type_names, rotation=45)
+    ax.legend()
+    ax.set_xlabel('State')
+    ax.set_ylabel('Average Type')
+    ax.set_title('Average Brewery Type by State')
+
+    fig.subplots_adjust(bottom=0.3)
+
     plt.show()
+

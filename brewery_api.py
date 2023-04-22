@@ -90,23 +90,114 @@ def addBreweries(breweries, cur, conn):
             )
         rows += 1
     conn.commit()
-'''
-def get_info(cur, conn):
-    cur.execute(
-         """
-        SELECT Types.type, States.state
-        FROM Breweries
-        JOIN Types ON Breweries.brewery_type_id = Types.id
-        JOIN States ON Breweries.state_id = States.id
-        """
-    )
-    return cur.fetchall()
-'''
+
+def write_json_file(avg_brewery_type_by_state):
+    path = os.path.dirname(os.path.abspath(__file__))
+    with open("brewery_stats.json", "w") as file:
+        json.dump(avg_brewery_type_by_state, file, indent = 4)
+
+def merge_databases(db_names, new_db_name):
+    conn = sqlite3.connect(new_db_name)
+
+    for i, db_name in enumerate(db_names):
+        conn.execute(f"ATTACH DATABASE '{db_name}' AS db{i}")
+    
+    # Copy tables from art_institute.db
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS artworkss (
+                    id INTEGER PRIMARY KEY, 
+                    title TEXT, 
+                    origin_id INTEGER, 
+                    dept_id INTEGER, 
+                    FOREIGN KEY (origin_id) REFERENCES origin(id),
+                    FOREIGN KEY (dept_id) REFERENCES dept(id)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS origins (
+            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            origins TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS depts (
+            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            depts TEXT
+        )
+    """)
+    conn.execute("""
+        INSERT OR IGNORE INTO artworkss
+        SELECT * FROM db0.artworks
+    """)
+    conn.execute("""
+        INSERT OR IGNORE INTO origins
+        SELECT * FROM db0.origin
+    """)
+    conn.execute("""
+        INSERT OR IGNORE INTO depts
+        SELECT * FROM db0.dept
+    """)
+    
+    # Copy tables from brewery_database.db
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS breweriess (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            state_id INTEGER,
+            brewery_type_id INTEGER,
+            FOREIGN KEY (state_id) REFERENCES states (id),
+            FOREIGN KEY (brewery_type_id) REFERENCES types (id)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS statess (
+            id INTEGER PRIMARY KEY,
+            states TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS typess (
+            id INTEGER PRIMARY KEY,
+            types TEXT
+        )
+    """)
+    conn.execute("""
+        INSERT OR IGNORE INTO breweriess
+        SELECT * FROM db1.breweries
+    """)
+    conn.execute("""
+        INSERT OR IGNORE INTO statess
+        SELECT * FROM db1.states
+    """)
+    conn.execute("""
+        INSERT OR IGNORE INTO typess
+        SELECT * FROM db1.types
+    """)
+    
+    # Copy tables from weather.db
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS weathers (
+			year INT NOT NULL,
+			month INT NOT NULL,
+			tavg DECIMAL(5,2),
+			PRIMARY KEY (year, month)
+        )
+    """)
+    conn.execute("""
+        INSERT OR IGNORE INTO weathers
+        SELECT * FROM db2.weather
+    """)
+    
+    conn.commit()
+    conn.close()
 
 def main():
     url = "https://api.openbrewerydb.org/v1/breweries"
     breweries = get_api(url)
     cur, conn = setUpDatabase("brewery_database.db")
+    cur, conn = setUpDatabase("combined.db")
+    db_names = ["art_institute.db", "brewery_database.db", "weather.db"]
+    new_db_name = "combined.db"
     createBreweriesTable(cur, conn)
     createTypeTable(cur, conn)
     createStateTable(cur, conn)
@@ -114,14 +205,12 @@ def main():
     addBreweries(breweries, cur, conn)
     addTypes(breweries, cur, conn)
     addStates(breweries, cur, conn)
+    #merge_databases(db_names, new_db_name)
     avg_brewery_type_by_state = get_avg_brewery_type_by_state(cur)
-    for state in avg_brewery_type_by_state:
-        print(f"{state}:")
-        for brewery_type, percentage in avg_brewery_type_by_state[state].items():
-            print(f"{brewery_type}: {percentage:.2%}")
-        print()
-
     #plot data
     plot_avg_brewery_type_by_state(avg_brewery_type_by_state)
+    write_json_file(avg_brewery_type_by_state)
+    conn.close()
+
 if __name__ == "__main__":
     main()
