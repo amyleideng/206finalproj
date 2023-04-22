@@ -1,59 +1,46 @@
 {
-    "Flanders": {
-        "Textiles": 91.67,
-        "Prints and Drawings": 8.33
-    },
-    "France": {
-        "Textiles": 18.18,
-        "Painting and Sculpture of Europe": 63.64,
-        "Photography and Media": 4.55,
-        "Prints and Drawings": 13.64
-    },
-    "Iran": {
-        "Arts of Asia": 100.0
-    },
-    "Italy": {
-        "Painting and Sculpture of Europe": 100.0
-    },
-    "Morocco": {
-        "Arts of Asia": 100.0
-    },
-    "Belgium": {
-        "Textiles": 100.0
-    },
-    "Spain": {
-        "Painting and Sculpture of Europe": 33.33,
-        "Modern Art": 66.67
-    },
-    "Japan": {
-        "Textiles": 100.0
+    "Berlin": {
+        "Applied Arts of Europe": 100.0
     },
     "United States": {
-        "Textiles": 16.67,
-        "Arts of the Americas": 33.33,
-        "Contemporary Art": 16.67,
-        "Photography and Media": 33.33
+        "Contemporary Art": 14.29,
+        "Architecture and Design": 85.71
     },
-    "England": {
-        "Photography and Media": 66.67,
-        "Textiles": 33.33
-    },
-    "New York": {
-        "Arts of the Americas": 100.0
-    },
-    "United Kingdom": {
-        "Painting and Sculpture of Europe": 100.0
-    },
-    "London": {
+    "Helsinki": {
         "Textiles": 100.0
     },
-    "Republic of the Congo": {
-        "Arts of Africa": 100.0
+    "Germany": {
+        "Architecture and Design": 100.0
     },
-    "Vienna": {
-        "Textiles": 100.0
+    "Weisswasser": {
+        "Applied Arts of Europe": 100.0
     },
-    "Ghana": {
-        "Arts of Africa": 100.0
+    "Linden Avenue, 415 North": {
+        "Architecture and Design": 100.0
+    },
+    "State Street, 3360 South": {
+        "Architecture and Design": 100.0
+    },
+    "China": {
+        "Architecture and Design": 100.0
+    },
+    "Florida": {
+        "Architecture and Design": 100.0
+    },
+    "O'Hare International Airport": {
+        "Architecture and Design": 100.0
+    },
+    "France": {
+        "Architecture and Design": 50.0,
+        "Applied Arts of Europe": 50.0
+    },
+    "California": {
+        "Architecture and Design": 100.0
+    },
+    "Wisconsin": {
+        "Architecture and Design": 100.0
+    },
+    "Tokyo": {
+        "Architecture and Design": 100.0
     }
 }

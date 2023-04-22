@@ -62,11 +62,18 @@ def add_dept(url, cur, conn):
     conn.commit()
 
 def add_artwork(url, cur, conn):
-    rows = 0
     artworks = get_api(url)
-    for art_dict in artworks:
-        if rows >= 25:
-            break 
+    # cur.execute("SELECT COUNT(id) FROM artworks")
+    # rows = cur.fetchone()[0]
+
+    num_to_add = 25
+    num_rows = cur.execute("SELECT COUNT(*) FROM artworks").fetchone()[0]
+    rows = 0
+    for i, art_dict in enumerate(artworks):
+        # if rows >= 100:
+        if i >= num_to_add or rows >= num_to_add + num_rows:
+            break
+
         id = art_dict["id"]
         title = art_dict["title"]
         place_of_origin = art_dict["place_of_origin"]
@@ -75,7 +82,7 @@ def add_artwork(url, cur, conn):
         sql = "INSERT OR IGNORE INTO artworks (id, title, origin_id, dept_id) VALUES (?, ?, (SELECT id FROM origin WHERE origin = ?), (SELECT id FROM dept WHERE dept = ?))"
         vals = (id, title, place_of_origin, department_title)
         cur.execute(sql, vals)
-
+        
         rows += 1
 
     conn.commit()
