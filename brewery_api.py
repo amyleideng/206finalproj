@@ -195,22 +195,29 @@ def main():
     url = "https://api.openbrewerydb.org/v1/breweries"
     breweries = get_api(url)
     cur, conn = setUpDatabase("brewery_database.db")
-    cur, conn = setUpDatabase("combined.db")
-    db_names = ["art_institute.db", "brewery_database.db", "weather.db"]
-    new_db_name = "combined.db"
+    #making brewery_database.db
     createBreweriesTable(cur, conn)
     createTypeTable(cur, conn)
     createStateTable(cur, conn)
-
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA database_list")
+    print(cursor.fetchall())
     addBreweries(breweries, cur, conn)
     addTypes(breweries, cur, conn)
     addStates(breweries, cur, conn)
-    #merge_databases(db_names, new_db_name)
-    avg_brewery_type_by_state = get_avg_brewery_type_by_state(cur)
+
     #plot data
+    avg_brewery_type_by_state = get_avg_brewery_type_by_state(cur)
     plot_avg_brewery_type_by_state(avg_brewery_type_by_state)
     write_json_file(avg_brewery_type_by_state)
-    conn.close()
+
+    #making combined database
+    #reassigning cur and conn
+    cur, conn = setUpDatabase("combined.db")
+    db_names = ["art_institute.db", "brewery_database.db", "weather.db"]
+    new_db_name = "combined.db"
+    merge_databases(db_names, new_db_name)
+ 
 
 if __name__ == "__main__":
     main()
